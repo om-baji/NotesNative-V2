@@ -17,7 +17,6 @@ const NotesPage = () => {
 
     useEffect(() => {
         const getData = async () => {
-            console.log(status, session);
             if (session && status === "authenticated") {
                 try {
                     const res = await getNotes(session as UserSession, status);
@@ -45,17 +44,16 @@ const NotesPage = () => {
         }
     }, [status, session]);
 
-
     return (
         <div className="bg-gray-900 min-h-screen text-white">
             <AppBar />
-            <div className='container mx-auto p-6'>
+            <div className='container mx-auto p-4 sm:p-6'>
                 <div className='flex justify-center items-center h-full'>
                     {loading && (
                         <div className='text-center'>
-                            <h2 className='text-3xl mb-4'>You do not have any saved notes!</h2>
+                            <h2 className='text-2xl sm:text-3xl mb-4'>You do not have any saved notes!</h2>
                             <div className='flex flex-col items-center'>
-                                <span className='text-lg mb-2'>Create one now</span>
+                                <span className='text-md sm:text-lg mb-2'>Create one now</span>
                                 <button
                                     onClick={() => router.push("/notes/create")}
                                     className='bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300 ease-in-out'
@@ -66,7 +64,7 @@ const NotesPage = () => {
                         </div>
                     )}
                     {!loading && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
                             {notes.map((note) => (
                                 <div
                                     onClick={() => {
@@ -75,7 +73,7 @@ const NotesPage = () => {
                                     key={note.id}
                                     className="bg-gray-800 p-4 rounded-lg shadow-lg transition transform hover:scale-105 hover:shadow-xl"
                                 >
-                                    <h3 className="text-xl font-bold mb-2">{note.title}</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold mb-2">{note.title}</h3>
                                     <p className="mb-4 text-gray-400">{note.description.slice(0, 300)}........</p>
                                     <div className="text-sm text-gray-500">
                                         <p>Created: {new Date(note.createdAt).toLocaleDateString()}</p>
