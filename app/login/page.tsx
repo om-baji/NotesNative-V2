@@ -20,6 +20,7 @@ const Login = () => {
       password: data.password,
       callbackUrl : "/notes"
     },)
+    if(user) console.log("Success")
   };
 
   return (

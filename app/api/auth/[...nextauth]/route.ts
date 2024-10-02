@@ -1,4 +1,4 @@
-"use server"
+"use server";
 import NextAuth from "next-auth/next";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/utils/db";
@@ -6,6 +6,9 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
+import { NextAuthOptions, User } from "next-auth";
+import { JWT } from "next-auth/jwt";
+
 
 const handler = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -24,12 +27,12 @@ const handler = NextAuth({
           type: "password",
         },
       },
-      async authorize(credentials: any) : Promise<any> {
-        console.log(credentials)
+      async authorize(credentials): Promise<any> {
+        console.log(credentials);
         try {
           const user = await prisma.user.findUnique({
             where: {
-              email: credentials.username,
+              email: credentials?.username,
             },
           });
 
@@ -61,14 +64,14 @@ const handler = NextAuth({
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async jwt({ token, user }): Promise<any> {
+    async jwt({ token, user }): Promise<JWT> {
       if (user) {
         token.id = user.id;
         token.email = user.email;
       }
       return token;
     },
-    async session({ session, token }): Promise<any> {
+    async session({ session, token }): Promise<typeof session> {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;

@@ -26,8 +26,10 @@ const Login = () => {
           password: data.password,
           callbackUrl: "/notes"
         })
-      }
 
+        if(userData) console.log("Success")
+      }
+      
       toast.success("Signup successful!", {
         duration: 4000
       });
@@ -36,6 +38,7 @@ const Login = () => {
       toast.error("Signup failed. Please try again.", {
         duration: 4000
       });
+      console.log(e)
     }
 
   };

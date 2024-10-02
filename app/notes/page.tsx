@@ -22,7 +22,7 @@ const NotesPage = () => {
                     const res = await getNotes(session as UserSession, status);
 
                     if (res.notes && res.notes.length > 0) {
-                        //@ts-ignore
+                        //@ts-expect-error
                         setNotes(res.notes);
                         setLoading(false);
                     } else {

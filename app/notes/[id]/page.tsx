@@ -27,13 +27,15 @@ const Page = () => {
             toast.error("Update failed", {
                 duration: 4000
             });
+
+            console.log(error)
         }
     };
 
     useEffect(() => {
         const getData = async () => {
             const data = await getNote(id as string);
-            //@ts-ignore
+            //@ts-expect-error
             setNote(data?.note);
             setLoading(false);
         };
