@@ -1,80 +1,121 @@
-"use client";
+"use client"
 
-import AppBar from "@/components/AppBar";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { signupInfo, signupSchema } from "@/utils/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { signup } from "@/actions/user";
+import { toast } from 'react-hot-toast';
 
-const SignUp = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+const Login = () => {
+  const form = useForm<signupInfo>({
+    resolver: zodResolver(signupSchema),
+  });
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === confirmPassword) {
-      // Handle sign up logic here
-      console.log("Signing up with:", email, password);
-    } else {
-      console.error("Passwords do not match!");
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = form;
+
+  const onSubmit = async (data: signupInfo) => {
+    console.log(data);
+    try {
+      const user = await signup(data)
+
+      if (user.success) {
+        const userData = await signIn("credentials", {
+          username: data.email,
+          password: data.password,
+          callbackUrl: "/notes"
+        })
+      }
+
+      toast.success("Signup successful!", {
+        duration: 4000
+      });
+
+    } catch (e) {
+      toast.error("Signup failed. Please try again.", {
+        duration: 4000
+      });
     }
+
   };
 
   return (
-    <div className="bg-black min-h-screen">
-      <AppBar />
-      <div className="flex flex-col justify-center items-center min-h-screen">
-        <div className="bg-zinc-900 p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-bold mb-6 text-center text-white">Sign Up</h2>
+    <div className="h-screen flex items-center justify-center bg-gray-900">
 
-          <form onSubmit={handleSignUp} className="space-y-4">
-            <div>
-              <label className="block text-gray-200">Email</label>
+      <div className="w-full max-w-4xl bg-gray-800 rounded-lg shadow-lg grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+
+        <div className="p-8 flex flex-col justify-center bg-gray-800">
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">Register</h2>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="name" className="text-gray-400">Name</label>
               <input
+                className="p-3 rounded-lg text-white bg-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                type="text"
+                placeholder="Someone"
+                id="name"
+                {...register("name")}
+              />
+              {errors.email && <span className="text-red-500">Email is required</span>}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className="text-gray-400">Email</label>
+              <input
+                className="p-3 rounded-lg text-white bg-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 type="email"
                 placeholder="someone@xyz.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-zinc-800 text-white focus:outline-none focus:border-blue-500"
-                required
+                id="email"
+                {...register("email")}
               />
+              {errors.email && <span className="text-red-500">Email is required</span>}
             </div>
-            <div>
-              <label className="block text-gray-200">Password</label>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="password" className="text-gray-400">Password</label>
               <input
+                className="p-3 rounded-lg text-white bg-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
                 type="password"
-                placeholder="Someone@123"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-zinc-800 text-white focus:outline-none focus:border-blue-500"
-                required
+                placeholder="Password"
+                id="password"
+                {...register("password")}
               />
+              {errors.password && <span className="text-red-500">Password is required</span>}
             </div>
-            <div>
-              <label className="block text-gray-200">Confirm Password</label>
-              <input
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-600 rounded-lg bg-zinc-800 text-white focus:outline-none focus:border-blue-500"
-                required
-              />
+
+            <div className="text-sm text-neutral-400">
+              Already have an account? <Link className="text-blue-600 text-sm" href={"/login"}>Login</Link>
             </div>
+
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-500 transition-colors"
+              disabled={isSubmitting}
+              className="bg-teal-500 text-white p-3 rounded-lg hover:bg-teal-600 transition duration-300"
             >
-              Sign Up
+              {isSubmitting ? "Loading..." : "Register with Email"}
             </button>
-          </form>
 
-          <div className="my-6 border-t border-gray-600"></div>
+          </form>
+        </div>
+
+        <div className="bg-gray-700 p-8 flex flex-col justify-center items-center">
+          <h2 className="text-2xl font-bold text-white mb-6">Or Sign In With</h2>
 
           <button
-            onClick={() => signIn("github")}
-            className="w-full bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors"
+            onClick={() => signIn("github", { callbackUrl: "/notes" })}
+            className="bg-gray-100 text-gray-800 p-3 rounded-lg flex items-center gap-3 mb-4 w-full justify-center hover:bg-gray-200 transition duration-300 shadow-md"
           >
-            Sign Up with GitHub
+            <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" className="w-6 h-6" />
+            <span>Sign in with GitHub</span>
+          </button>
+
+          <button
+            onClick={() => signIn("google", { callbackUrl: "/notes" })}
+            className="bg-gray-100 text-gray-800 p-3 rounded-lg flex items-center gap-3 w-full justify-center hover:bg-gray-200 transition duration-300 shadow-md"
+          >
+            <img src="https://w7.pngwing.com/pngs/249/19/png-transparent-google-logo-g-suite-google-guava-google-plus-company-text-logo.png" alt="Google" className="w-6 h-6" />
+            <span>Sign in with Google</span>
           </button>
         </div>
       </div>
@@ -82,4 +123,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Login;

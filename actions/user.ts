@@ -1,28 +1,36 @@
+"use server"
 import prisma from "@/utils/db";
-import { loginInfo } from "@/utils/types";
-import bcrypt from "bcrypt";
+import { signupInfo } from "@/utils/types";
+import bcrypt from "bcryptjs";
 
-export async function login({email,password} : loginInfo){
-    try {
-        const response = await prisma.user.findUnique({
-            where : {
-                email
-            },
-            select : {
-                id : true,
-                password : true,
-                email : true
-            }
-        })
+export async function signup({ name, email, password }: signupInfo) {
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
 
-        if(!response) throw new Error("Something went wrong")
-
-        const isValid = await bcrypt.compare(password,response?.password)
-
-        if(!isValid) throw new Error("Wrong password")
-
-
-    } catch (e) {
-        return 
+    if (existingUser) {
+      throw new Error("User already exists.");
     }
+
+    const hashPass = await bcrypt.hash(password, 10);
+    const response = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashPass,
+      },
+    });
+    if (!response) throw new Error("Something went wrong");
+
+    return {
+      success: true,
+      message : "Succesfully created!"
+    };
+  } catch (e) {
+    return {
+        success : false,
+        message : e
+    }
+  }
 }
