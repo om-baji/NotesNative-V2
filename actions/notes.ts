@@ -1,8 +1,6 @@
 "use server"
 import prisma from "@/utils/db";
-import { notesInfo } from "@/utils/types";
 import { Session } from "next-auth";
-import { useSession } from "next-auth/react";
 
 
 export interface UserSession extends Session{
